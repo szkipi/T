@@ -1,0 +1,214 @@
+# Tennis30 Precision Configuration
+# Multi-pass tennis tracking architecture
+
+pipeline:
+  mode: precision  # Options: fast, balanced, precision
+  passes: 4  # Number of refinement passes (1-4)
+  device: cuda  # cuda or cpu
+
+# ===== BALL TRACKING =====
+ball_tracking:
+  # Ensemble models and weights
+  ensemble:
+    tracknet:
+      enabled: true
+      weight: 0.30
+      threshold: 0.5
+      model_path: ../tennis-tracking/WeightsTracknet/model.1
+
+    yolo_v1:
+      enabled: false  # Requires fine-tuning
+      weight: 0.25
+      threshold: 0.3
+      model_path: models/yolo_ball_v1.pt
+
+    yolo_v2:
+      enabled: false  # Requires fine-tuning
+      weight: 0.25
+      threshold: 0.3
+      model_path: models/yolo_ball_v2.pt
+
+    samurai:
+      enabled: false  # Integration pending
+      weight: 0.15
+      threshold: 0.4
+      checkpoint: ../samurai/checkpoints/sam2.1_hiera_base_plus.pt
+
+    faster_rcnn:
+      enabled: false
+      weight: 0.05
+      threshold: 0.4
+
+  # Temporal refinement
+  temporal_window: 15  # frames to look back/forward
+  kalman_smoothing: bidirectional  # forward, backward, bidirectional
+  interpolation_method: cubic_spline  # linear, cubic_spline, physics, ml
+
+  # Outlier detection
+  outlier_zscore_threshold: 3.0
+
+
+# ===== POSE ESTIMATION =====
+pose_estimation:
+  # Multi-model fusion
+  models:
+    yolov8_pose:
+      enabled: true
+      weight: 0.30
+      model: yolov8x-pose.pt  # x for maximum accuracy
+      keypoints: 17
+
+    mediapipe:
+      enabled: true
+      weight: 0.30
+      keypoints: 33
+      model_complexity: 2  # 0=lite, 1=full, 2=heavy
+      min_detection_confidence: 0.3
+
+    hrnet:
+      enabled: false  # Optional high-res model
+      weight: 0.25
+      config: hrnet_w48
+
+    alphapose:
+      enabled: false  # Optional 26-keypoint model
+      weight: 0.15
+      keypoints: 26
+
+  # Temporal smoothing
+  temporal_smoothing: savgol_filter  # none, moving_avg, savgol_filter
+  savgol_window: 11
+  savgol_polyorder: 3
+
+  # Skeleton constraints
+  skeleton_constraints:
+    enabled: true
+    bone_length_variance: 0.1  # 10% allowed variation
+    joint_angle_limits:
+      elbow: [0, 180]
+      knee: [0, 180]
+      shoulder: [0, 200]
+      hip: [0, 150]
+
+
+# ===== PHYSICS ENGINE =====
+physics:
+  # Constants
+  gravity: 9.81  # m/s²
+  drag_coefficient: 0.55  # tennis ball
+  air_density: 1.225  # kg/m³
+  ball_mass: 0.058  # kg
+  ball_radius: 0.033  # meters
+
+  # Constraints
+  max_ball_velocity: 180  # km/h (professional level)
+  max_spin: 5000  # rpm
+
+  # Bounce physics
+  bounce_damping: 0.75  # energy loss on bounce
+  friction_coefficient: 0.6
+
+  # Trajectory fitting
+  trajectory_method: parabolic  # linear, parabolic, ml
+  optimization_method: scipy_minimize
+  physics_validation: true
+
+
+# ===== COURT DETECTION =====
+court_detection:
+  model: resnet50  # or custom trained model
+  keypoints: 14  # court line keypoints
+
+  # Real-world dimensions (meters)
+  court_dimensions:
+    singles_width: 8.23
+    doubles_width: 10.97
+    length: 23.77
+    service_line: 6.40
+    baseline_to_service: 5.49
+    net_height: 0.914
+
+
+# ===== GAME STATE TRACKING =====
+game_state:
+  rally_detection:
+    enabled: true
+    min_rally_duration: 1.0  # seconds
+    ball_out_threshold: 3  # frames
+
+  ocr_scoreboard:
+    enabled: false  # Requires OCR model
+    check_interval: 30  # frames
+
+  shot_classification:
+    enabled: false  # Requires action recognition model
+    classes: [serve, forehand, backhand, volley, smash, slice]
+
+
+# ===== OUTPUT CONFIGURATION =====
+output:
+  # Export formats
+  export_formats:
+    - csv
+    - json
+    - unity
+    - unreal
+
+  # Precision targets
+  precision:
+    ball_position_accuracy: 0.02  # meters (2cm)
+    pose_keypoint_accuracy: 0.05  # meters (5cm)
+    trajectory_deviation: 0.10  # meters from physics model
+
+  # CSV structure
+  csv:
+    ball_file: ball_data.csv
+    player1_file: player1_data.csv
+    player2_file: player2_data.csv
+    game_state_file: game_state.json
+
+    include_fields:
+      ball: [frame_id, timestamp, x_2d, y_2d, x_3d, y_3d, z_3d,
+             vx, vy, vz, velocity_mag, is_bounce, rally_id,
+             confidence, interpolated, physics_valid]
+
+      player: [frame_id, timestamp, player_id, center_x_2d, center_y_2d,
+               center_x_3d, center_y_3d, velocity, action,
+               nose_x, nose_y, nose_z, left_shoulder_x, ...]
+
+
+# ===== VISUALIZATION =====
+visualization:
+  enabled: true
+
+  show_ball_trail: true
+  trail_length: 30  # frames
+
+  show_player_skeleton: true
+  skeleton_thickness: 2
+
+  show_court_lines: true
+
+  show_trajectory_prediction: true
+  prediction_horizon: 15  # frames
+
+  overlay_stats: true
+  stats_position: top_right
+
+  fps: 30
+  resolution: [1920, 1080]
+
+
+# ===== PERFORMANCE =====
+performance:
+  batch_size: 32
+  num_workers: 4
+  prefetch_factor: 2
+
+  # Memory management
+  offload_to_cpu: false
+  max_gpu_memory: 8  # GB
+
+  # Caching
+  cache_detections: true
+  cache_dir: .cache/
