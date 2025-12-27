@@ -40,8 +40,13 @@ class EnsembleBallTracker:
         self.config = config
         self.device = device
         self.trackers: List[BaseBallTracker] = []
-        self.spatial_radius = config.get("spatial_clustering", {}).get("radius", 10)
-        self.min_models = config.get("spatial_clustering", {}).get("min_models", 2)
+
+        # Extract ensemble configuration (config is ball_tracking block)
+        ensemble_config = config.get("ensemble", {})
+        spatial_config = ensemble_config.get("spatial_clustering", {})
+
+        self.spatial_radius = spatial_config.get("radius", 10)
+        self.min_models = spatial_config.get("min_models", 2)
 
         # Initialize individual trackers
         self._initialize_trackers()
