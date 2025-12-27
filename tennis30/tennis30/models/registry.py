@@ -3,9 +3,9 @@
 from pathlib import Path
 from typing import Any, Dict, Optional, Type
 
-from tennis30.src.core.court.base_detector import BaseCourtDetector
-from tennis30.src.core.pose.base_estimator import BasePoseEstimator
-from tennis30.src.core.tracking.ball.base_tracker import BaseBallTracker
+from tennis30.core.court.base_detector import BaseCourtDetector
+from tennis30.core.pose.base_estimator import BasePoseEstimator
+from tennis30.core.tracking.ball.base_tracker import BaseBallTracker
 
 
 class ModelRegistry:

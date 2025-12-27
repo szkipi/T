@@ -16,10 +16,10 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from tennis30.src.core.physics.engine import TennisPhysicsEngine
-from tennis30.src.core.physics.kalman import BidirectionalKalmanSmoother, KalmanFilter
-from tennis30.src.core.tracking.ball.ensemble import EnsembleBallTracker
-from tennis30.src.utils.config import ConfigLoader
+from tennis30.core.physics.engine import TennisPhysicsEngine
+from tennis30.core.physics.kalman import BidirectionalKalmanSmoother, KalmanFilter
+from tennis30.core.tracking.ball.ensemble import EnsembleBallTracker
+from tennis30.utils.config import ConfigLoader
 
 
 class PrecisionPipeline:

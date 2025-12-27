@@ -121,7 +121,7 @@ def models(
         tennis30 models --download tracknet
         tennis30 models --download-all
     """
-    from tennis30.src.models.registry import MODEL_METADATA
+    from tennis30.models.registry import MODEL_METADATA
 
     if download or download_all:
         rprint("[yellow]⚠ Model download not yet implemented[/yellow]")
@@ -175,7 +175,7 @@ def config(
         tennis30 config --show
         tennis30 config --get ball_tracking.ensemble.tracknet.weight
     """
-    from tennis30.src.utils.config import load_config
+    from tennis30.utils.config import load_config
 
     try:
         cfg = load_config(config_name)
@@ -185,7 +185,7 @@ def config(
 
     if key:
         # Get specific key
-        from tennis30.src.utils.config import ConfigLoader
+        from tennis30.utils.config import ConfigLoader
 
         loader = ConfigLoader()
         loader.load(config_name)
@@ -207,7 +207,7 @@ def config(
 @app.command()
 def version():
     """Show Tennis30 version information."""
-    from tennis30.src.utils.config import load_config
+    from tennis30.utils.config import load_config
 
     cfg = load_config("default")
     version = cfg.get("project", {}).get("version", "unknown")

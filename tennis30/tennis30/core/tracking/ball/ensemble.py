@@ -9,8 +9,8 @@ from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 from scipy.spatial.distance import cdist
 
-from tennis30.src.core.tracking.ball.base_tracker import BaseBallTracker
-from tennis30.src.models.registry import ModelRegistry
+from tennis30.core.tracking.ball.base_tracker import BaseBallTracker
+from tennis30.models.registry import ModelRegistry
 
 
 class EnsembleBallTracker:
