@@ -11,7 +11,6 @@ Támogatott formátumok:
 
 import sys
 import os
-sys.path.insert(0, '/home/user/T/tennis30/src')
 
 import cv2
 import numpy as np
@@ -24,11 +23,13 @@ def test_single_frame(image_path: str):
 
     # Check if dependencies are available
     try:
-        from core.tracking.ball.ensemble import EnsembleBallTracker
-        from utils.config import ConfigLoader
+        # Import trackers to register them
+        from tennis30.core.tracking.ball import yolo_tracker, tracknet_tracker
+        from tennis30.core.tracking.ball.ensemble import EnsembleBallTracker
+        from tennis30.utils.config import ConfigLoader
 
-        # Load config
-        config = ConfigLoader().load("default")
+        # Load test config (lightweight, no model weights needed)
+        config = ConfigLoader().load("test")
         ball_config = config.get("ball_tracking", {})
 
         # Load image
@@ -76,11 +77,13 @@ def test_video(video_path: str, max_frames: int = 30):
     print(f"🎬 Testing video: {video_path}\n")
 
     try:
-        from core.tracking.ball.ensemble import EnsembleBallTracker
-        from utils.config import ConfigLoader
+        # Import trackers to register them
+        from tennis30.core.tracking.ball import yolo_tracker, tracknet_tracker
+        from tennis30.core.tracking.ball.ensemble import EnsembleBallTracker
+        from tennis30.utils.config import ConfigLoader
 
-        # Load config
-        config = ConfigLoader().load("default")
+        # Load test config (lightweight, no model weights needed)
+        config = ConfigLoader().load("test")
         ball_config = config.get("ball_tracking", {})
 
         # Open video

@@ -1,0 +1,81 @@
+# Tennis30 Test Configuration (lightweight - no model weights needed)
+# For testing without downloading large model files
+
+# Ball tracking configuration
+ball_tracking:
+  enabled: true
+
+  ensemble:
+    # Spatial clustering for ensemble fusion
+    spatial_clustering:
+      radius: 10  # pixels
+      min_models: 1  # Lowered from 2 for testing
+
+    # TrackNet - only this one for testing (placeholder/color-based)
+    tracknet:
+      enabled: true
+      weight: 1.0  # 100% weight since it's the only tracker
+      model_path: "data/models/tracknet_v2.pth"  # Not actually loaded in placeholder mode
+      threshold: 0.5
+      input_size: [640, 360]
+
+    # Disable YOLO trackers (no weights)
+    yolo_v1:
+      enabled: false
+      weight: 0.0
+      model_path: "data/models/yolov8n_tennis_v1.pt"
+      threshold: 0.4
+      input_size: 640
+
+    yolo_v2:
+      enabled: false
+      weight: 0.0
+      model_path: "data/models/yolov8n_tennis_v2.pt"
+      threshold: 0.4
+      input_size: 640
+
+    # Disable SAMURAI (no weights)
+    samurai:
+      enabled: false
+      weight: 0.0
+      model_path: "data/models/samurai_base.pt"
+      threshold: 0.6
+
+    # Disable Faster R-CNN (no weights)
+    faster_rcnn:
+      enabled: false
+      weight: 0.0
+      model_path: "data/models/faster_rcnn_tennis.pth"
+      threshold: 0.7
+
+# Temporal refinement (Kalman filter)
+temporal:
+  enabled: true
+  kalman:
+    process_noise: 0.01
+    measurement_noise: 0.1
+  interpolation:
+    max_gap_frames: 10
+    method: "cubic"
+
+# Physics validation
+physics:
+  enabled: true
+  gravity: 9.81
+  drag_coefficient: 0.47
+  ball_radius: 0.033  # meters
+  max_velocity: 200.0  # km/h
+  max_acceleration: 50.0  # m/s²
+
+# Pipeline settings
+pipeline:
+  num_passes: 4
+  confidence_threshold: 0.3
+  output_fps: 30
+  visualization: true
+
+# Paths
+paths:
+  models_dir: "data/models"
+  output_dir: "output"
+  cache_dir: ".cache"
